@@ -3,7 +3,7 @@ import pandas as pd
 
 
 # TODO: First implementation, maybe convert to class or change some details in methods / functions
-def get_results(results_file: string, separator: str = '') -> pd.DataFrame:
+def get_results(results_file: str, separator: str = '') -> pd.DataFrame:
     data = pd.read_csv(results_file, sep=separator)
     return data
 
@@ -21,7 +21,7 @@ def handle_data(data: pd.DataFrame) -> (pd.DataFrame.values,
 
 
 # TODO: How we want visualize results and how experiment looks like
-def plot_results(data: pd.DataFrame, scale: sting = None) -> None:
+def plot_results(data: pd.DataFrame, scale: str = None) -> None:
     efficiency, delay_time = handle_data(data)
     plt.plot(delay_time, efficiency)
     plt.title('C++ vs Python efficiency')
@@ -34,7 +34,7 @@ def plot_results(data: pd.DataFrame, scale: sting = None) -> None:
     return
 
 
-def get_joined_results(save_path: string = None):
+def get_joined_results(save_path: str = None):
     for language in ['cpp', 'python']:
         data = get_results(language)
         plot_results(data)

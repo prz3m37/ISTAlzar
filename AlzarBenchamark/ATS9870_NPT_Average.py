@@ -240,8 +240,8 @@ class ATSPython:
               (bytesTransferred, bytesPerSec))
         self.__captured_time = transferTime_sec
         self.__bytes_transferred = bytesTransferred
-        # TODO: In C++ code we have just [ABABABA....] but here we have two nested arrays. We might just save it as it is
-        #  or // TODO: in the same way. This is is not so important we do it after time measurement
+        # TODO: In C++ code we have just [ABABABA....] but here we have two nested arrays. We might just save it as
+        #  it is or // TODO: in the same way. This is is not so important we do it after time measurement
         if saveAvgData:
             buffer_list_mean.tofile(dataAvgFile)
         del buffer_list_mean

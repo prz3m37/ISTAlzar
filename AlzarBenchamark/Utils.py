@@ -1,7 +1,7 @@
 from time import gmtime, strftime
 import pandas as pd
 
-class Utils:
+class Utils(object):
 
     def __init__(self):
         self.__current_time = None
@@ -20,7 +20,7 @@ class Utils:
             res_file = open(results_file, 'a')
             res_file.write(test_data)
             res_file.close()
-            print("[INFO]: Captured time succesfully saved !")
+            print("[INFO]: Captured time successfully saved !")
         except IOError:
             print("[ERROR]: The resultsFile can't be opened !")
         return

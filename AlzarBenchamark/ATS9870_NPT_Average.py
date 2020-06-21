@@ -170,7 +170,7 @@ class ATSPython:
         for buffer in buffers:
             board.postAsyncBuffer(buffer.addr, buffer.size_bytes)
 
-        start = time.clock()  # Keep track of when acquisition started
+        start = time.clock()  # Keep track of when acquisition started // It is CPU time so it's good
         try:
             board.startCapture()  # Start the acquisition
             print("Capturing %d buffers. Press <enter> to abort" %
@@ -210,18 +210,21 @@ class ATSPython:
                 # Optionaly save data to file
                 if dataFile:
                     buffer.buffer.tofile(dataFile)
-
+                # TODO: Check if this is calculated properly and saved properly => In fact we can test already
+                #  becnchmark :D
                 for channel in range(channelCount):
                     buffer_split = np.split(channel_split[channel], recordsPerBuffer)
                     buffer_mean = np.mean(buffer_split, 0)
                     buffer_list[channel].append(buffer_mean)
                 # Add the buffer to the end of the list of available buffers.
                 board.postAsyncBuffer(buffer.addr, buffer.size_bytes)
-
         finally:
             board.abortAsyncRead()
         # Compute the average of signal/signals.
         buffer_list_mean = np.mean(buffer_list, 1)
+        channel_A = buffer_list_mean[0]
+        channel_B = buffer_list_mean[1]
+        alternating_buffer_list_mean = np.ravel([channel_A, channel_B], 'F')
         # Compute the total transfer time, and display performance information.
         transferTime_sec = time.clock() - start
         print("Capture completed in %f sec" % transferTime_sec)
@@ -240,10 +243,8 @@ class ATSPython:
               (bytesTransferred, bytesPerSec))
         self.__captured_time = transferTime_sec
         self.__bytes_transferred = bytesTransferred
-        # TODO: In C++ code we have just [ABABABA....] but here we have two nested arrays. We might just save it as
-        #  it is or // TODO: in the same way. This is is not so important we do it after time measurement
         if saveAvgData:
-            buffer_list_mean.tofile(dataAvgFile)
+            alternating_buffer_list_mean.tofile(dataAvgFile)
         del buffer_list_mean
         gc.collect()
         return

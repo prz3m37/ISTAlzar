@@ -1,6 +1,7 @@
 from time import gmtime, strftime
 import pandas as pd
 
+
 class Utils(object):
 
     def __init__(self):

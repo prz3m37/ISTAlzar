@@ -18,6 +18,7 @@ class ATSPython:
 
     def __init__(self):
         self.__utils = Utils()
+        self.__params = None
         self.__captured_time = None
         self.__trigger_delay = None
         self.__bytes_transferred = None
@@ -34,7 +35,7 @@ class ATSPython:
         #  - or select clock source FAST_EXTERNAL_CLOCK, sample rate
         #    SAMPLE_RATE_USER_DEF, and connect a 100MHz signal to the
         #    EXT CLK BNC connector
-        global samplesPerSec
+        #global samplesPerSec
         samplesPerSec = 1000000000.0
         board.setCaptureClock(ats.INTERNAL_CLOCK,
                               ats.SAMPLE_RATE_1GSPS,
@@ -129,11 +130,11 @@ class ATSPython:
 
         if saveData:
             dataFile = open(os.path.join(os.path.dirname(__file__),
-                                         "data.bin"), 'wb')
+                                         "/home/useme/Przemek/ATS9870_Results/data_python.bin"), 'wb')
 
         if saveAvgData:
             dataAvgFile = open(os.path.join(os.path.dirname(__file__),
-                                            "data_avg.bin"), 'wb')
+                                            "/home/useme/Przemek/ATS9870_Results/data_avg_python.bin"), 'wb')
 
         # Compute the number of bytes per record and per buffer
         memorySize_samples, bitsPerSample = board.getChannelInfo()
@@ -254,10 +255,13 @@ class ATSPython:
         return
 
     def run_ats(self):
+        results_file_path = "/home/useme/Przemek/ATS9870_Results/resultsFile.txt"
+        config_file_path = "./configFile.txt"
+
+        self.__params = self.__utils.parse_config_file(config_file_path)
         board = ats.Board(systemId=1, boardId=1)
         self.ConfigureBoard(board)
         self.AcquireData(board)
-        results_file_path = "/home/useme/Przemek/CppVersion/ATS9870/DualPort/NPT_Average/resultsFile.txt"
         self.__utils.save_test_data(results_file_path, self.__captured_time,
                                     self.__bytes_transferred, self.__trigger_delay)
 

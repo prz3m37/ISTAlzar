@@ -17,8 +17,8 @@ class Utils(object):
 
         current_time = self.__get_current_time()
         test_data = "[PyhCode] " + str(current_time) + " " + \
-                    str(captured_time) + " " + str(number_of_points) \
-                    + " " + str(trigger_delay) + "\n"
+                    str(captured_time) + " " + str(trigger_delay) \
+                    + " " + str(number_of_points) + "\n"
         try:
             res_file = open(results_file, 'a')
             res_file.write(test_data)

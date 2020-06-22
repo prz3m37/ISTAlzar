@@ -1,0 +1,17 @@
+#Set 1
+decimation
+recordsPerBuffer
+buffersPerAcquisition
+postTriggerSamples
+
+#Set 2
+decimation
+recordsPerBuffer
+buffersPerAcquisition
+postTriggerSamples
+
+#Set 3
+decimation
+recordsPerBuffer
+buffersPerAcquisition
+postTriggerSamples

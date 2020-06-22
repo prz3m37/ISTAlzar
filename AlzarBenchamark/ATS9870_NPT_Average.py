@@ -1,5 +1,4 @@
 from __future__ import division
-from Utils import Utils  # TODO: Remember about correct path
 import ctypes
 import numpy as np
 import os
@@ -9,7 +8,10 @@ import sys
 import time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..', 'Library'))
+sys.path.append('/home/useme/Przemek/PythonVersion/ISTAlzar/AlzarBenchamark')
+
 import atsapi as ats
+from Utils import Utils
 
 
 class ATSPython:
@@ -106,10 +108,10 @@ class ATSPython:
         postTriggerSamples = 2048
 
         # TODO: Select the number of records per DMA buffer.
-        recordsPerBuffer = 10
+        recordsPerBuffer = 1
 
         # TODO: Select the number of buffers per acquisition.
-        buffersPerAcquisition = 10
+        buffersPerAcquisition = 1
 
         # TODO: Select the active channels.
         channels = ats.CHANNEL_A | ats.CHANNEL_B
@@ -216,15 +218,19 @@ class ATSPython:
                     buffer_split = np.split(channel_split[channel], recordsPerBuffer)
                     buffer_mean = np.mean(buffer_split, 0)
                     buffer_list[channel].append(buffer_mean)
+
+                buffer_list_mean = np.mean(buffer_list, 1)
+                channel_A = buffer_list_mean[0]
+                channel_B = buffer_list_mean[1]
+                alternating_buffer_list_mean = np.ravel([channel_A, channel_B], 'F')
+                if saveAvgData:
+                    alternating_buffer_list_mean.tofile(dataAvgFile)
                 # Add the buffer to the end of the list of available buffers.
                 board.postAsyncBuffer(buffer.addr, buffer.size_bytes)
         finally:
             board.abortAsyncRead()
         # Compute the average of signal/signals.
-        buffer_list_mean = np.mean(buffer_list, 1)
-        channel_A = buffer_list_mean[0]
-        channel_B = buffer_list_mean[1]
-        alternating_buffer_list_mean = np.ravel([channel_A, channel_B], 'F')
+
         # Compute the total transfer time, and display performance information.
         transferTime_sec = time.clock() - start
         print("Capture completed in %f sec" % transferTime_sec)
@@ -243,8 +249,6 @@ class ATSPython:
               (bytesTransferred, bytesPerSec))
         self.__captured_time = transferTime_sec
         self.__bytes_transferred = bytesTransferred
-        if saveAvgData:
-            alternating_buffer_list_mean.tofile(dataAvgFile)
         del buffer_list_mean
         gc.collect()
         return
@@ -253,8 +257,8 @@ class ATSPython:
         board = ats.Board(systemId=1, boardId=1)
         self.ConfigureBoard(board)
         self.AcquireData(board)
-        result_file_path = "/home/useme/Przemek/CppVersion/ATS9870/DualPort/NPT_Average/resultFile.txt"
-        self.__utils.save_test_data(result_file_path, self.__captured_time,
+        results_file_path = "/home/useme/Przemek/CppVersion/ATS9870/DualPort/NPT_Average/resultsFile.txt"
+        self.__utils.save_test_data(results_file_path, self.__captured_time,
                                     self.__bytes_transferred, self.__trigger_delay)
 
 

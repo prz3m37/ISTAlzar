@@ -7,6 +7,7 @@ class Utils:
     def __init__(self):
         pass
 
+    # TODO: Get the same for C++ today (Monday)
     @staticmethod
     def parse_config_file(config_file: str) -> dict:
         params_container = {}

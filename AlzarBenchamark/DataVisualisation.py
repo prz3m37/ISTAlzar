@@ -1,51 +1,27 @@
 import matplotlib.pyplot as plt
-import pandas as pd
+from DataProcessor import DataProcessor
 
 
-# TODO: First implementation, maybe convert to class or change some details in methods / functions
-def get_results(results_file: str, separator: str = '') -> pd.DataFrame:
-    data = pd.read_csv(results_file, sep=separator)
-    return data
+class DataVisualisation(DataProcessor):
 
+    def __init__(self):
+        self.__data_processor = DataProcessor()
 
-def handle_data(data: pd.DataFrame) -> (pd.DataFrame.values,
-                                        pd.DataFrame.values):
-    delay_time = data['t_delay'].values
-    total_time = data['t_total'].values
-    trigger_time = data['t_trigger'].values
-    number_of_points = data['n_points'].values  # TODO: Check definition of this variable
-    # TODO: Definition of efficiency may change.
-    efficiency = total_time / (number_of_points * trigger_time)
+    def __del__(self):
+        del self.__data_processor
 
-    return efficiency, delay_time
+    def plot_data(self) -> None:
+        python_code, cpp_code, decimation = self.__data_processor.pass_data_to_plot()
 
+        x_python = python_code["percentage[%]"].values
+        y_python = python_code["Efficiency"].values
 
-# TODO: How we want visualize results and how experiment looks like
-def plot_results(data: pd.DataFrame, scale: str = None) -> None:
-    efficiency, delay_time = handle_data(data)
-    plt.plot(delay_time, efficiency)
-    plt.title('C++ vs Python efficiency')
-    if scale == 'log':
-        plt.yscale('log')
-    plt.xlabel('Time of delay [s]')
-    plt.legend(loc='upper right')
-    plt.ylabel('Efficiency [%]')
+        x_cpp = cpp_code["percentage[%]"].values
+        y_cpp = cpp_code["Efficiency"].values
 
-    return
-
-
-def get_joined_results(save_path: str = None):
-    for language in ['cpp', 'python']:
-        data = get_results(language)
-        plot_results(data)
-    plt.savefig(save_path)
-    return
-
-
-def main():
-    get_joined_results('')
-    return
-
-
-if __name__ == "__main__":
-    main()
+        plt.plot(x_python, y_python)
+        plt.plot(x_cpp, y_cpp)
+        plt.title("NPT Average Cpp vs Python efficiency; decimation = " +
+                  str(decimation) + " buffer size = 4")
+        plt.show()
+        return

@@ -1,4 +1,4 @@
-from time import strftime
+from time import gmtime, strftime
 import pandas as pd
 import numpy as np
 
@@ -24,8 +24,6 @@ class Utils:
                             params_container[param_name] = param_value
                 else:
                     pass
-            if configuration_set == "*Set1":
-                params_container["postTriggerSamples"] = 64  # Deal with repeatingvalues like 11
             cfg_file.close()
             print("[INFO]: All params have been red successfully !")
         except IOError:
@@ -54,7 +52,7 @@ class Utils:
 
     @staticmethod
     def __get_current_time() -> str:
-        return strftime("%Y-%m-%d-%H:%M:%S")
+        return strftime("%Y-%m-%d-%H:%M:%S", gmtime())
 
     @staticmethod
     def __open_binary_files(data_path, data_avg_path):
@@ -76,3 +74,5 @@ class Utils:
         return
 
 '''
+if configuration_set == "*Set1":
+    params_container["postTriggerSamples"] = 64  # Deal with repeatingvalues like 11

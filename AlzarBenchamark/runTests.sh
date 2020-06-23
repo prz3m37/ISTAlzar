@@ -9,7 +9,7 @@ do
     echo
     start=`date +%s`
     echo "[INFO] Cpp code test run....... "
-    cd /home/useme/Przemek/CppVersion/ATS9870/DualPort/NPT_Average/ && make clean && make && ./ATS9870_NPT_Average $i $j
+    #cd /home/useme/Przemek/CppVersion/ATS9870/DualPort/NPT_Average/ && make clean && make && ./ATS9870_NPT_Average $i $j
     echo
     echo "[INFO] Python code test run....... "
     echo

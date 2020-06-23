@@ -10,7 +10,7 @@ class DataVisualisation(DataProcessor):
     def __del__(self):
         del self.__data_processor
 
-    def plot_data(self) -> None:
+    def plot_test_data(self) -> None:
         python_code, cpp_code, decimation = self.__data_processor.pass_data_to_plot()
 
         x_python = python_code["percentage[%]"].values
@@ -24,4 +24,7 @@ class DataVisualisation(DataProcessor):
         plt.title("NPT Average Cpp vs Python efficiency; decimation = " +
                   str(decimation) + " buffer size = 4")
         plt.show()
+        return
+
+    def plot_data(self):
         return

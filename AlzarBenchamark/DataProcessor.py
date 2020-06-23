@@ -1,27 +1,29 @@
 import pandas as pd
 import numpy as np
+from Utils import Utils
+
 
 class DataProcessor:
 
     def __init__(self):
-        pass
+        self.__utils = Utils()
+
+    def prepare_data(self, results_data: str) -> pd.DataFrame:
+        read_results_df = self.__utils.read_results(results_data)
+        read_results_df.columns = ["Code_version", "Test_data", "Captured_time[ns]", "Records_per_buffer",
+                                   "Buffers_per_acquisition", "Post_trigger_samples", "decimation"]
+        read_results_df.sort_values(by=["Code_version"], inplace=True)
+        return read_results_df
 
     @staticmethod
-    def __prepare_data(results_data: pd.DataFrame) -> pd.DataFrame:
-        results_data.columns = ["Code_version", "Test_data", "Captured_time[ns]", "Records_per_buffer",
-                                "Buffers_per_acquisition", "Post_trigger_samples", "decimation"]
-        results_data.sort_values(by=["Code_version"], inplace=True)
-        return results_data
-
-    @staticmethod
-    def __evaluate_efficiency(results_data: pd.DataFrame, time_of_experiment: int):
+    def evaluate_efficiency(results_data: pd.DataFrame, time_of_experiment: int):
         results_data["Time_of_experiment[ns]"] = time_of_experiment
         results_data["Total_time[ns]"] = results_data["Post_trigger_samples"] * results_data["decimation"]
         results_data["percentage[%]"] = results_data["Total_time[ns]"] / results_data["Time_of_experiment[ns]"]
-        results_data["Efficiency"] = results_data["Time_of_experiment"] / \
+        results_data["Efficiency"] =( results_data["Time_of_experiment[ns]"] / \
                                      (results_data["Buffers_per_acquisition"]
                                       * results_data["Records_per_buffer"]
-                                      * results_data["Total_time"])
+                                      * results_data["Total_time[ns]"])) * 100
         return results_data
 
     # TODO: Add possibility of different decimations and buffers :D

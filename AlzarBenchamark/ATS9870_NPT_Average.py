@@ -23,7 +23,7 @@ class ATSPython:
         self.__decimation = None
         self.__transferTime_sec = None
         self.__captured_time = None
-        self.__number_of_points = None
+        self.__post_trigger_samples = None
         self.__records_per_buffer = None
         self.__buffers_per_acquisition = None
 
@@ -34,7 +34,7 @@ class ATSPython:
         del self.__decimation
         del self.__transferTime_sec
         del self.__captured_time
-        del self.__number_of_points
+        del self.__post_trigger_samples
         del self.__records_per_buffer
         del self.__buffers_per_acquisition
 
@@ -122,7 +122,7 @@ class ATSPython:
         preTriggerSamples = 0
         # TODO: Select the number of samples per record.
         postTriggerSamples = int(self.__params["postTriggerSamples"])
-        self.__number_of_points = postTriggerSamples
+        self.__post_trigger_samples = postTriggerSamples
         # TODO: Select the number of records per DMA buffer.
         recordsPerBuffer = int(self.__params["recordsPerBuffer"])
         self.__records_per_buffer = recordsPerBuffer
@@ -241,16 +241,16 @@ class ATSPython:
                 channel_A = buffer_list_mean[0]
                 channel_B = buffer_list_mean[1]
                 alternating_buffer_list_mean = np.ravel([channel_A, channel_B], 'F')
-                self.__transferTime_sec = time.clock() - start
-                if saveAvgData:
-                    buffer_list_mean.tofile(dataAvgFile)
+
+                #if saveAvgData:
+                    #buffer_list_mean.tofile(dataAvgFile)
                 # Add the buffer to the end of the list of available buffers.
                 board.postAsyncBuffer(buffer.addr, buffer.size_bytes)
         finally:
             board.abortAsyncRead()
+        self.__transferTime_sec = time.clock() - start
         # Compute the average of signal/signals.
         # Compute the total transfer time, and display performance information.
-        self.__transferTime_sec = time.clock() - start
         print("Capture completed in %f sec" % self.__transferTime_sec)
         buffersPerSec = 0
         bytesPerSec = 0
@@ -275,9 +275,8 @@ class ATSPython:
         configuration_set = sys.argv[2]
         cfg_file = sys.argv[1]
 
-        results_file_path = "/home/useme/Przemek/ATS9870_Results/resultsFile.txt"
+        results_file_path = "/home/useme/Przemek//ATS9870_Results/resultsFile.txt"
         config_file_path = "/home/useme/Przemek/PythonVersion/ISTAlzar/AlzarBenchamark/" + cfg_file
-        print(config_file_path)
 
         self.__set = configuration_set
         self.__params = self.__utils.parse_config_file(config_file_path, configuration_set)
@@ -285,7 +284,7 @@ class ATSPython:
         self.ConfigureBoard(board)
         self.AcquireData(board)
         self.__utils.save_test_data(results_file_path, self.__captured_time, self.__records_per_buffer,
-                                    self.__buffers_per_acquisition, self.__number_of_points, self.__decimation)
+                                    self.__buffers_per_acquisition, self.__post_trigger_samples, self.__decimation)
 
 
 def main():

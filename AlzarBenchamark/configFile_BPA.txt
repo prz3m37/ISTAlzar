@@ -1,65 +1,65 @@
 *Set1
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=64
+buffersPerAcquisition=5
+postTriggerSamples=9984
 
 *Set2
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=1024
+buffersPerAcquisition=10
+postTriggerSamples=9984
 
 *Set3
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=2048
+buffersPerAcquisition=50
+postTriggerSamples=9984
 
 *Set4
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=3008
+buffersPerAcquisition=70
+postTriggerSamples=9984
 
 *Set5
 decimation=1
 recordsPerBuffer=2789
 buffersPerAcquisition=100
-postTriggerSamples=4032
+postTriggerSamples=9984
 
 *Set6
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=5056
+buffersPerAcquisition=150
+postTriggerSamples=9984
 
 *Set7
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=6016
+buffersPerAcquisition=200
+postTriggerSamples=9984
 
 *Set8
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=7040
+buffersPerAcquisition=300
+postTriggerSamples=9984
 
 *Set9
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=8064
+buffersPerAcquisition=400
+postTriggerSamples=9984
 
 *Set10
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
-postTriggerSamples=9088
+buffersPerAcquisition=500
+postTriggerSamples=9984
 
 *Set11
 decimation=1
 recordsPerBuffer=2789
-buffersPerAcquisition=100
+buffersPerAcquisition=512
 postTriggerSamples=9984

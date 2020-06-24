@@ -14,18 +14,16 @@ class Utils:
         try:
             cfg_file = open(config_file, 'r')
             for line in cfg_file:
-                if configuration_set in line:
+                if configuration_set in line and len(configuration_set) + 1 == len(line):
                     for sub_line in cfg_file:
                         param_set = sub_line.split('=')
-                        if str(param_set[0]).startswith("Set") or str(param_set[0]).startswith("\n"):
+                        if str(param_set[0]).startswith("*Set") or str(param_set[0]).startswith("\n"):
                             break
                         else:
                             param_name, param_value = param_set[0], float(param_set[1])
                             params_container[param_name] = param_value
                 else:
                     pass
-            if configuration_set == "*Set1":
-                params_container["postTriggerSamples"] = 64  # Deal with repeatingvalues like 11
             cfg_file.close()
             print("[INFO]: All params have been red successfully !")
         except IOError:
@@ -34,7 +32,7 @@ class Utils:
 
     @staticmethod
     def read_results(results_file: str) -> pd.DataFrame:
-        results_data = pd.read_csv(results_file, delimiter=" ")
+        results_data = pd.read_csv(results_file, sep=' ')
         return results_data
 
     def save_test_data(self, results_file: str, captured_time: float, records_per_buffer: int,

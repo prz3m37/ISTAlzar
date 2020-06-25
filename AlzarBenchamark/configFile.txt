@@ -1,7 +1,7 @@
 *Set1
 decimation=1
-recordsPerBuffer=1000
-buffersPerAcquisition=100
+recordsPerBuffer=1
+buffersPerAcquisition=1
 postTriggerSamples=64
 
 *Set2

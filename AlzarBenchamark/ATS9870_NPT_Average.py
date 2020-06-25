@@ -19,9 +19,24 @@ class ATSPython:
     def __init__(self):
         self.__utils = Utils()
         self.__params = None
+        self.__set = None
+        self.__decimation = None
+        self.__transferTime_sec = None
         self.__captured_time = None
-        self.__trigger_delay = None
-        self.__bytes_transferred = None
+        self.__post_trigger_samples = None
+        self.__records_per_buffer = None
+        self.__buffers_per_acquisition = None
+
+    def __del__(self):
+        del self.__set
+        del self.__utils
+        del self.__params
+        del self.__decimation
+        del self.__transferTime_sec
+        del self.__captured_time
+        del self.__post_trigger_samples
+        del self.__records_per_buffer
+        del self.__buffers_per_acquisition
 
     # Configures a board for acquisition
     def ConfigureBoard(self, board):
@@ -36,7 +51,9 @@ class ATSPython:
         #    SAMPLE_RATE_USER_DEF, and connect a 100MHz signal to the
         #    EXT CLK BNC connector
         #global samplesPerSec
-        samplesPerSec = 1000000000.0
+        decimation = self.__params["decimation"]
+        self.__decimation = decimation
+        samplesPerSec = 1000000000.0 / decimation
         board.setCaptureClock(ats.INTERNAL_CLOCK,
                               ats.SAMPLE_RATE_1GSPS,
                               ats.CLOCK_EDGE_RISING,
@@ -77,7 +94,6 @@ class ATSPython:
 
         # TODO: Set trigger delay as required.
         triggerDelay_sec = 0
-        self.__trigger_delay = triggerDelay_sec
         triggerDelay_samples = int(triggerDelay_sec * samplesPerSec + 0.5)
         board.setTriggerDelay(triggerDelay_samples)
 
@@ -104,16 +120,15 @@ class ATSPython:
     def AcquireData(self, board):
         # No pre-trigger samples in NPT mode
         preTriggerSamples = 0
-
         # TODO: Select the number of samples per record.
-        postTriggerSamples = 2048
-
+        postTriggerSamples = int(self.__params["postTriggerSamples"])
+        self.__post_trigger_samples = postTriggerSamples
         # TODO: Select the number of records per DMA buffer.
-        recordsPerBuffer = 1
-
+        recordsPerBuffer = int(self.__params["recordsPerBuffer"])
+        self.__records_per_buffer = recordsPerBuffer
         # TODO: Select the number of buffers per acquisition.
-        buffersPerAcquisition = 1
-
+        buffersPerAcquisition = int(self.__params["buffersPerAcquisition"])
+        self.__buffers_per_acquisition = buffersPerAcquisition
         # TODO: Select the active channels.
         channels = ats.CHANNEL_A | ats.CHANNEL_B
         channelCount = 0
@@ -130,11 +145,13 @@ class ATSPython:
 
         if saveData:
             dataFile = open(os.path.join(os.path.dirname(__file__),
-                                         "/home/useme/Przemek/ATS9870_Results/data_python.bin"), 'wb')
+                                         "/home/useme/Przemek/ATS9870_Results/PythonResults/" + str(self.__set) +
+                                         "data_python.bin"), 'wb')
 
         if saveAvgData:
             dataAvgFile = open(os.path.join(os.path.dirname(__file__),
-                                            "/home/useme/Przemek/ATS9870_Results/data_avg_python.bin"), 'wb')
+                                            "/home/useme/Przemek/ATS9870_Results/PythonResults/" + str(self.__set) +
+                                            "data_avg_python.bin"), 'wb')
 
         # Compute the number of bytes per record and per buffer
         memorySize_samples, bitsPerSample = board.getChannelInfo()
@@ -224,51 +241,56 @@ class ATSPython:
                 channel_A = buffer_list_mean[0]
                 channel_B = buffer_list_mean[1]
                 alternating_buffer_list_mean = np.ravel([channel_A, channel_B], 'F')
-                if saveAvgData:
-                    alternating_buffer_list_mean.tofile(dataAvgFile)
+
+                #if saveAvgData:
+                    #buffer_list_mean.tofile(dataAvgFile)
                 # Add the buffer to the end of the list of available buffers.
                 board.postAsyncBuffer(buffer.addr, buffer.size_bytes)
         finally:
             board.abortAsyncRead()
+        self.__transferTime_sec = time.clock() - start
         # Compute the average of signal/signals.
-
         # Compute the total transfer time, and display performance information.
-        transferTime_sec = time.clock() - start
-        print("Capture completed in %f sec" % transferTime_sec)
+        print("Capture completed in %f sec" % self.__transferTime_sec)
         buffersPerSec = 0
         bytesPerSec = 0
         recordsPerSec = 0
-        if transferTime_sec > 0:
-            buffersPerSec = buffersCompleted / transferTime_sec
-            bytesPerSec = bytesTransferred / transferTime_sec
-            recordsPerSec = recordsPerBuffer * buffersCompleted / transferTime_sec
+        if self.__transferTime_sec > 0:
+            buffersPerSec = buffersCompleted / self.__transferTime_sec
+            bytesPerSec = bytesTransferred / self.__transferTime_sec
+            recordsPerSec = recordsPerBuffer * buffersCompleted / self.__transferTime_sec
         print("Captured %d buffers (%f buffers per sec)" %
               (buffersCompleted, buffersPerSec))
         print("Captured %d records (%f records per sec)" %
               (recordsPerBuffer * buffersCompleted, recordsPerSec))
         print("Transferred %d bytes (%f bytes per sec)" %
               (bytesTransferred, bytesPerSec))
-        self.__captured_time = transferTime_sec
-        self.__bytes_transferred = bytesTransferred
+        self.__captured_time = self.__transferTime_sec
         del buffer_list_mean
         gc.collect()
         return
 
     def run_ats(self):
-        results_file_path = "/home/useme/Przemek/ATS9870_Results/resultsFile.txt"
-        config_file_path = "./configFile.txt"
+        sys.path.insert(1, '..')
+        configuration_set = sys.argv[2]
+        cfg_file = sys.argv[1]
 
-        self.__params = self.__utils.parse_config_file(config_file_path)
+        results_file_path = "/home/useme/Przemek//ATS9870_Results/resultsFile.txt"
+        config_file_path = "/home/useme/Przemek/PythonVersion/ISTAlzar/AlzarBenchamark/" + cfg_file
+
+        self.__set = configuration_set
+        self.__params = self.__utils.parse_config_file(config_file_path, configuration_set)
         board = ats.Board(systemId=1, boardId=1)
         self.ConfigureBoard(board)
         self.AcquireData(board)
-        self.__utils.save_test_data(results_file_path, self.__captured_time,
-                                    self.__bytes_transferred, self.__trigger_delay)
+        self.__utils.save_test_data(results_file_path, self.__captured_time, self.__records_per_buffer,
+                                    self.__buffers_per_acquisition, self.__post_trigger_samples, self.__decimation)
 
 
 def main():
-    ats = ATSPython()
-    ats.run_ats()
+    ats_python = ATSPython()
+    ats_python.run_ats()
+    del ats_python
 
 
 if __name__ == "__main__":

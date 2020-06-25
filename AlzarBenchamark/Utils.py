@@ -1,24 +1,23 @@
-from time import gmtime, strftime
+from time import strftime
 import pandas as pd
+import numpy as np
 
 
-# TODO: Add del in NPT AVERAGE PY !!!!
 class Utils:
 
     def __init__(self):
         pass
 
-    # TODO: Get the same for C++ , for python is enough
     @staticmethod
-    def parse_config_file(config_file: str, parameterization: str) -> dict:
+    def parse_config_file(config_file: str, configuration_set: str) -> dict:
         params_container = {}
         try:
             cfg_file = open(config_file, 'r')
             for line in cfg_file:
-                if parameterization in line:
-                    for subline in cfg_file:
-                        param_set = subline.split('=')
-                        if str(param_set[0]).startswith("#Set") or str(param_set[0]).startswith("\n"):
+                if configuration_set in line and len(configuration_set) + 1 == len(line):
+                    for sub_line in cfg_file:
+                        param_set = sub_line.split('=')
+                        if str(param_set[0]).startswith("*Set") or str(param_set[0]).startswith("\n"):
                             break
                         else:
                             param_name, param_value = param_set[0], float(param_set[1])
@@ -33,7 +32,7 @@ class Utils:
 
     @staticmethod
     def read_results(results_file: str) -> pd.DataFrame:
-        results_data = pd.read_csv(results_file)
+        results_data = pd.read_csv(results_file, sep=' ')
         return results_data
 
     def save_test_data(self, results_file: str, captured_time: float, records_per_buffer: int,
@@ -53,7 +52,25 @@ class Utils:
 
     @staticmethod
     def __get_current_time() -> str:
-        return strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        return strftime("%Y-%m-%d-%H:%M:%S")
+
+    @staticmethod
+    def __open_binary_files(data_path, data_avg_path):
+        f = open(data_path, "r")
+        data = np.fromfile(f, dtype=np.uint8)
+        f.close()
+
+        f_avg = open(data_avg_path, "r")
+        data_avg = np.fromfile(f, dtype=np.uint8)
+        f_avg.close()
+
+        return data, data_avg
+'''
+    def __parse_binary_data(self):
+        self.__open_binary_files()
+        return
 
     def __get_test_version(self):
         return
+
+'''

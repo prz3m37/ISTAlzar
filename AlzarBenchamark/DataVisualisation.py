@@ -58,7 +58,7 @@ class DataVisualisation(DataProcessor):
 
         results_data_file = "/home/useme/Przemek//ATS9870_Results/resultsFile_correct.txt"
         python_code, cpp_code = self.__data_processor.pass_data_to_plot(results_data_file)
-        plt.figure(figsize=(15, 7))
+        plt.figure(figsize=(18, 10))
         plt.subplot(211)
         for i in [1000, 1200, 1400, 1600, 1800, 2000, 2300, 2400, 2789, 3000]:
             print("Plotting for: " + str(i) + " records_per_buffers")
@@ -66,7 +66,7 @@ class DataVisualisation(DataProcessor):
             cpp_code_mean = cpp_code_rpb.groupby(["Records_per_buffer", "percentage[%]"], as_index=False).agg(
                 {'Efficiency': ['mean', 'std']})
 
-            label = str(i) + "records per buffer"
+            label = str(i) + " RPB"
 
             x_cpp = cpp_code_mean["percentage[%]"].values
             y_cpp = cpp_code_mean["Efficiency"]["mean"].values
@@ -76,11 +76,13 @@ class DataVisualisation(DataProcessor):
                          uplims=True, lolims=True)
 
         plt.xticks(np.arange(0, 100, step=10))
+        plt.axhline(y=0.5, color='r', ls=":")
         plt.yticks(np.arange(0.2, 1.1, step=0.1))
         plt.grid(True)
-        plt.legend(loc='upper right', ncol=2)
+        plt.legend(bbox_to_anchor=(1.1, 1.02), loc="upper right")
         plt.xlabel('t_total/t_trigger [%]')
         plt.ylabel('Efficiency')
+        plt.title("NPT Average for Cpp and Python efficiency for all examples")
 
         plt.subplot(212)
         for i in [1000, 1200, 1400, 1600, 1800, 2000, 2300, 2400, 2789, 3000]:
@@ -101,11 +103,10 @@ class DataVisualisation(DataProcessor):
         plt.xticks(np.arange(0, 100, step=10))
         plt.yticks(np.arange(0.2, 1.1, step=0.1))
         plt.grid(True)
-        plt.legend(loc='upper right', ncol=2)
+        plt.axhline(y=0.5, color='r', ls=":")
         plt.xlabel('t_total/t_trigger [%]')
         plt.ylabel('Efficiency')
 
-        plt.title("NPT Average for Cpp and Python efficiency for all examples")
         plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/cpp_python_overall.png")
 
 

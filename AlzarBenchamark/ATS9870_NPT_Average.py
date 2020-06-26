@@ -6,7 +6,7 @@ import signal
 import gc
 import sys
 import time
-
+import matplotlib.pyplot as plt
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..', 'Library'))
 sys.path.append('/home/useme/Przemek/PythonVersion/ISTAlzar/AlzarBenchamark')
 
@@ -21,7 +21,6 @@ class ATSPython:
         self.__params = None
         self.__set = None
         self.__decimation = None
-        self.__transferTime_sec = None
         self.__captured_time = None
         self.__post_trigger_samples = None
         self.__records_per_buffer = None
@@ -32,7 +31,6 @@ class ATSPython:
         del self.__utils
         del self.__params
         del self.__decimation
-        del self.__transferTime_sec
         del self.__captured_time
         del self.__post_trigger_samples
         del self.__records_per_buffer
@@ -80,7 +78,7 @@ class ATSPython:
         # TODO: Select trigger inputs and levels as required.
         board.setTriggerOperation(ats.TRIG_ENGINE_OP_J,
                                   ats.TRIG_ENGINE_J,
-                                  ats.TRIG_CHAN_A,
+                                  ats.TRIG_EXTERNAL,
                                   ats.TRIGGER_SLOPE_POSITIVE,
                                   150,
                                   ats.TRIG_ENGINE_K,
@@ -190,7 +188,7 @@ class ATSPython:
         for buffer in buffers:
             board.postAsyncBuffer(buffer.addr, buffer.size_bytes)
 
-        start = time.clock()  # Keep track of when acquisition started // It is CPU time so it's good
+        start_time = time.perf_counter()   # Keep track of when acquisition started // It is CPU time so it's good
         try:
             board.startCapture()  # Start the acquisition
             print("Capturing %d buffers. Press <enter> to abort" %
@@ -236,36 +234,36 @@ class ATSPython:
                     buffer_split = np.split(channel_split[channel], recordsPerBuffer)
                     buffer_mean = np.mean(buffer_split, 0)
                     buffer_list[channel].append(buffer_mean)
-
-                buffer_list_mean = np.mean(buffer_list, 1)
-                channel_A = buffer_list_mean[0]
-                channel_B = buffer_list_mean[1]
-                alternating_buffer_list_mean = np.ravel([channel_A, channel_B], 'F')
-
-                #if saveAvgData:
-                    #buffer_list_mean.tofile(dataAvgFile)
+                    #buffer_list_mean = np.mean(buffer_list, 1)
                 # Add the buffer to the end of the list of available buffers.
                 board.postAsyncBuffer(buffer.addr, buffer.size_bytes)
         finally:
             board.abortAsyncRead()
-        self.__transferTime_sec = time.clock() - start
+        end_time = time.perf_counter()
+        transferTime_sec = end_time - startTime
         # Compute the average of signal/signals.
         # Compute the total transfer time, and display performance information.
-        print("Capture completed in %f sec" % self.__transferTime_sec)
+        print("Capture completed in %f sec" % transferTime_sec)
+        buffer_list_mean = np.mean(buffer_list, 1)
+        channel_A = buffer_list_mean[0]
+        channel_B = buffer_list_mean[1]
+        alternating_buffer_list_mean = np.ravel([channel_A, channel_B], 'F')
+        if saveAvgData:
+            alternating_buffer_list_mean.tofile(dataAvgFile)
         buffersPerSec = 0
         bytesPerSec = 0
         recordsPerSec = 0
-        if self.__transferTime_sec > 0:
-            buffersPerSec = buffersCompleted / self.__transferTime_sec
-            bytesPerSec = bytesTransferred / self.__transferTime_sec
-            recordsPerSec = recordsPerBuffer * buffersCompleted / self.__transferTime_sec
+        if transferTime_sec > 0:
+            buffersPerSec = buffersCompleted / transferTime_sec
+            bytesPerSec = bytesTransferred / transferTime_sec
+            recordsPerSec = recordsPerBuffer * buffersCompleted / transferTime_sec
         print("Captured %d buffers (%f buffers per sec)" %
               (buffersCompleted, buffersPerSec))
         print("Captured %d records (%f records per sec)" %
               (recordsPerBuffer * buffersCompleted, recordsPerSec))
         print("Transferred %d bytes (%f bytes per sec)" %
               (bytesTransferred, bytesPerSec))
-        self.__captured_time = self.__transferTime_sec
+        self.__captured_time = transferTime_sec
         del buffer_list_mean
         gc.collect()
         return

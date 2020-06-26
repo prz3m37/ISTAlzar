@@ -35,5 +35,4 @@ class DataProcessor:
         results_data = self.evaluate_efficiency(results_data_file)
         python_code = results_data.loc[results_data["Code_version"] == "[PyhCode]"]
         cpp_code = results_data.loc[results_data["Code_version"] == "[CppCode]"]
-
         return python_code, cpp_code

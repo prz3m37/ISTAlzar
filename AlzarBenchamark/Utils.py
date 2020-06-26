@@ -55,7 +55,7 @@ class Utils:
         return strftime("%Y-%m-%d-%H:%M:%S")
 
     @staticmethod
-    def __open_binary_files(data_path, data_avg_path):
+    def open_binary_files(data_path, data_avg_path):
         f = open(data_path, "r")
         data = np.fromfile(f, dtype=np.uint8)
         f.close()
@@ -68,9 +68,6 @@ class Utils:
 '''
     def __parse_binary_data(self):
         self.__open_binary_files()
-        return
-
-    def __get_test_version(self):
         return
 
 '''

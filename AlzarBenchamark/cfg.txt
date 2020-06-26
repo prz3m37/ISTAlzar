@@ -1,0 +1,5 @@
+*Set1
+decimation=1
+recordsPerBuffer=1000
+buffersPerAcquisition=100
+postTriggerSamples=256

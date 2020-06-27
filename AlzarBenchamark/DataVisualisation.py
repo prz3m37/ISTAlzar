@@ -11,31 +11,11 @@ class DataVisualisation(DataProcessor):
     def __del__(self):
         del self.__data_processor
 
-    def plot_test_data(self, results_data_file: str, records_per_buffer: int) -> None:
-        python_code, cpp_code = self.__data_processor.pass_data_to_plot(results_data_file)
-
-        python_code_rpb = python_code.loc[python_code["Records_per_buffer"] == records_per_buffer]
-        cpp_code_rpb = cpp_code.loc[cpp_code["Records_per_buffer"] == records_per_buffer]
-
-        cpp_code_mean = cpp_code_rpb.groupby(["Records_per_buffer", "percentage[%]"], as_index=False).agg(
-            {'Efficiency': ['mean', 'std']})
-
-        python_code_mean = python_code_rpb.groupby(["Records_per_buffer", "percentage[%]"], as_index=False).agg(
-            {'Efficiency': ['mean', 'std']})
-
-        x_python = python_code_mean["percentage[%]"].values
-        y_python = python_code_mean["Efficiency"]["mean"].values
-        y_python_errors = python_code_mean["Efficiency"]["std"].values
-
-        x_cpp = cpp_code_mean["percentage[%]"].values
-        y_cpp = cpp_code_mean["Efficiency"]["mean"].values
-        y_cpp_errors = cpp_code_mean["Efficiency"]["std"].values
+    @staticmethod
+    def plot_test_data(x_python, y_python, x_cpp, y_cpp, y_python_errors, y_cpp_errors,
+                       title: str) -> None:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 7), sharex=True)
-        fig.suptitle("NPT Average for Cpp vs Python efficiency; decimation = " +
-                     str(1) + " buffer size = 4" + " records_per_buffer = " +
-                     str(records_per_buffer) + " buffers_per_acquisition = 100")
-
         ax1.errorbar(x_cpp, y_cpp, yerr=y_cpp_errors, label='Cpp avg efficiency', fmt='o', c="r", capthick=2,
                      uplims=True, lolims=True)
         ax2.errorbar(x_python, y_python, yerr=y_python_errors, label='Python avg efficiency', fmt='o', c="b",
@@ -48,31 +28,20 @@ class DataVisualisation(DataProcessor):
         ax2.grid()
         ax1.set_xticks([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
         ax1.set_xticklabels([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], fontsize=12)
-        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/" + "decimation = " +
-                    str(1) + " buffer size = 4" + " records_per_buffer = " +
-                    str(records_per_buffer) + " buffers_per_acquisition = 100")
+        fig.suptitle(title)
+        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/" + str(title) + ".png")
 
         return
 
-    def plot_data(self):
-
-        results_data_file = "/home/useme/Przemek//ATS9870_Results/resultsFile_correct.txt"
-        python_code, cpp_code = self.__data_processor.pass_data_to_plot(results_data_file)
+    @staticmethod
+    def plot_test_data_overall(results_data, values_of_parameter, parameter, pass_data_to_plot, title):
         plt.figure(figsize=(18, 10))
         plt.subplot(211)
-        for i in [1000, 1200, 1400, 1600, 1800, 2000, 2300, 2400, 2789, 3000]:
-            print("Plotting for: " + str(i) + " records_per_buffers")
-            cpp_code_rpb = cpp_code.loc[cpp_code["Records_per_buffer"] == i]
-            cpp_code_mean = cpp_code_rpb.groupby(["Records_per_buffer", "percentage[%]"], as_index=False).agg(
-                {'Efficiency': ['mean', 'std']})
-
-            label = str(i) + " RPB"
-
-            x_cpp = cpp_code_mean["percentage[%]"].values
-            y_cpp = cpp_code_mean["Efficiency"]["mean"].values
-            y_cpp_errors = cpp_code_mean["Efficiency"]["std"].values
-
-            plt.errorbar(x_cpp, y_cpp, yerr=y_cpp_errors, label=label, fmt='o', capthick=2,
+        for value in values_of_parameter:
+            label = str(value) + " " + parameter
+            x_c, y_c, y_c_err = pass_data_to_plot(results_data=results_data, parameter=parameter,
+                                                  value_of_parameter=value, code_language="cpp")
+            plt.errorbar(x_c, y_c, yerr=y_c_err, label=label, fmt='o', capthick=2,
                          uplims=True, lolims=True)
 
         plt.xticks(np.arange(0, 100, step=10))
@@ -85,19 +54,11 @@ class DataVisualisation(DataProcessor):
         plt.title("NPT Average for Cpp and Python efficiency for all examples")
 
         plt.subplot(212)
-        for i in [1000, 1200, 1400, 1600, 1800, 2000, 2300, 2400, 2789, 3000]:
-            print("Plotting for: " + str(i) + " records_per_buffers")
-            python_code_rpb = python_code.loc[python_code["Records_per_buffer"] == i]
-
-            python_code_mean = python_code_rpb.groupby(["Records_per_buffer", "percentage[%]"], as_index=False).agg(
-                {'Efficiency': ['mean', 'std']})
-
-            label_cpp = str(i) + "records per buffer"
-            x_python = python_code_mean["percentage[%]"].values
-            y_python = python_code_mean["Efficiency"]["mean"].values
-            y_python_errors = python_code_mean["Efficiency"]["std"].values
-
-            plt.errorbar(x_python, y_python, yerr=y_python_errors, label=label_cpp, fmt='o', capthick=2,
+        for value in values_of_parameter:
+            label = str(value) + " " + parameter
+            x_p, y_p, y_p_err = pass_data_to_plot(results_data=results_data, parameter=parameter,
+                                                  value_of_parameter=value, code_language="python")
+            plt.errorbar(x_p, y_p, yerr=y_p_err, label=label, fmt='o', capthick=2,
                          uplims=True, lolims=True)
 
         plt.xticks(np.arange(0, 100, step=10))
@@ -107,22 +68,27 @@ class DataVisualisation(DataProcessor):
         plt.xlabel('t_total/t_trigger [%]')
         plt.ylabel('Efficiency')
 
-        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/cpp_python_overall.png")
-
-
+        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/" + str(title) + "_overall.png")
         return
 
+    # TODO: plot in VOLTAGES !!!
+    @staticmethod
+    def plot_averages(ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B):
 
-def main():
-    dv = DataVisualisation()
-    """ for i in [1000, 1200, 1400, 1600, 1800, 2000, 2300, 2400, 2789, 3000]:
-        print("Plotting for: " + str(i) + " records_per_buffers")
-        results_data_file = "/home/useme/Przemek//ATS9870_Results/resultsFile_correct.txt"
-        dv.plot_test_data(results_data_file=results_data_file, records_per_buffer=i)"""
-    dv.plot_data()
-    del dv
-    return
+        time = np.arange(0, 64, 1)
+        plt.figure(figsize=(18, 10))
+        plt.subplot(211)
+        plt.plot(time, ch_A_avg)
+        plt.plot(time, data_avg_ch_A)
+        plt.axvline(y=50, color='r', ls=":")
+        plt.xlabel('Time[ns]')
+        plt.ylabel('Voltage[V]')
 
-
-if __name__ == '__main__':
-    main()
+        plt.subplot(212)
+        plt.plot(time, ch_B_avg)
+        plt.plot(time, data_avg_ch_B)
+        plt.axvline(y=50, color='r', ls=":")
+        plt.xlabel('Time[ns]')
+        plt.ylabel('Voltage[V]')
+        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/channels_data_avg_comparison.png")
+        return

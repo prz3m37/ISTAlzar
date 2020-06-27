@@ -55,7 +55,7 @@ class Utils:
         return strftime("%Y-%m-%d-%H:%M:%S")
 
     @staticmethod
-    def open_binary_files(data_path, data_avg_path):
+    def __open_binary_files(data_path: str, data_avg_path: str):
         f = open(data_path, "r")
         data = np.fromfile(f, dtype=np.uint8)
         f.close()
@@ -63,11 +63,22 @@ class Utils:
         f_avg = open(data_avg_path, "r")
         data_avg = np.fromfile(f, dtype=np.uint8)
         f_avg.close()
-
         return data, data_avg
-'''
-    def __parse_binary_data(self):
-        self.__open_binary_files()
-        return
 
-'''
+    # TODO: See whether data is parsed correctly, but just see don't do this without being sure !!!!
+    @staticmethod
+    def __parse_binary_data(data: np.array, data_avg: np.array, buffers_per_acq: int):
+        length_of_data = len(data_avg)
+        channel_A, channel_B = [], []
+        for i in range(buffers_per_acq):
+            start, end = 64 * i, 64 * (i + 1)
+            channel_A.append(data[start:end])
+            channel_B.append(data[start:end])
+        data_avg_channel_A = data_avg[0:length_of_data]
+        data_avg_channel_B = data_avg[length_of_data:0]
+        return channel_A, channel_B, data_avg_channel_A, data_avg_channel_B
+
+    def prepare_binary_data(self, data_path: str, data_avg_path: str, buffers_per_acq: int):
+        data, data_avg = self.__open_binary_files(data_path, data_avg_path)
+        ch_A, ch_B, data_avg_ch_A, data_avg_ch_B = self.__parse_binary_data(data, data_avg, buffers_per_acq)
+        return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B

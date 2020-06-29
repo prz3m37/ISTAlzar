@@ -65,20 +65,36 @@ class Utils:
         f_avg.close()
         return data, data_avg
 
-    # TODO: See whether data is parsed correctly, but just see don't do this without being sure !!!!
+    # TODO: Reverse dividing data : samples , recordsa, buffers
     @staticmethod
-    def __parse_binary_data(data: np.array, data_avg: np.array, buffers_per_acq: int):
+    def __parse_binary_data(data: np.array, data_avg: np.array, records_per_buffer: int):
         length_of_data = len(data_avg)
-        channel_A, channel_B = [], []
-        for i in range(buffers_per_acq):
+        ch_A, ch_B = [], []
+        for num, i in enumerate(range(records_per_buffer)):
             start, end = 64 * i, 64 * (i + 1)
-            channel_A.append(data[start:end])
-            channel_B.append(data[start:end])
-        data_avg_channel_A = data_avg[0:length_of_data]
-        data_avg_channel_B = data_avg[length_of_data:0]
-        return channel_A, channel_B, data_avg_channel_A, data_avg_channel_B
+            if num % 2 == 0:
+                ch_A.append(data[start:end])
+            if num % 2 != 0:
+                ch_B.append(data[start:end])
+        data_avg_ch_A = data_avg[0:length_of_data]
+        data_avg_ch_B = data_avg[length_of_data:0]
+        return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B
 
     def prepare_binary_data(self, data_path: str, data_avg_path: str, buffers_per_acq: int):
         data, data_avg = self.__open_binary_files(data_path, data_avg_path)
         ch_A, ch_B, data_avg_ch_A, data_avg_ch_B = self.__parse_binary_data(data, data_avg, buffers_per_acq)
         return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B
+
+
+data = [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6]
+ch_A, ch_B = [], []
+for num, i in enumerate(range(6)):
+    start, end = 3 * i, 3 * (i + 1)
+    if num % 2 == 0:
+        print("a", data[start:end])
+        ch_A.append(data[start:end])
+    if num % 2 != 0:
+        print("b", data[start:end])
+        ch_B.append(data[start:end])
+print(ch_A)
+print(ch_B)

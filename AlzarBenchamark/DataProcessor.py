@@ -72,7 +72,7 @@ class DataProcessor:
             y_cpp_errors = cpp_code_efficiency["Efficiency"]["std"].values
             return x_python, y_python, x_cpp, y_cpp, y_python_errors, y_cpp_errors
 
-    # TODO: Adjust average method to output or inversely
+    # TODO: Set it properly
     @staticmethod
     def __calculate_average(channel_A: list, channel_B: list):
         channel_A_avg = np.mean(channel_A, axis=0)
@@ -92,5 +92,10 @@ class DataProcessor:
         ch_A_avg, ch_B_avg = self.__calculate_average(ch_A, ch_B)
         return ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B
 
-    def convert_samples_values(self):
-        return
+    @staticmethod
+    def convert_samples_values(sample_value, input_range_volts):
+        bits_per_sample = 8
+        code_zero = (1 << (bits_per_sample - 1)) - 0.5
+        code_range = (1 << (bits_per_sample - 1)) - 0.5
+        sample_volts = input_range_volts * float((sample_value - code_zero) / code_range)
+        return sample_volts

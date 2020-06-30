@@ -16,19 +16,14 @@ def main():
                                                                                                buffers_per_acq)
 
     fidelity = data_processor.compare_averages(ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B)
-
-    results_data = data_processor.prepare_data(results_data_file)
-    results_data = data_processor.evaluate_efficiency(results_data=results_data, time_of_experiment=10000)
-    for value in values_of_parameter:
-        title = ""
-        x_p, y_p, x_c, y_c, y_p_err, y_c_err = data_processor.pass_data_to_plot(results_data=results_data,
-                                                                                parameter=parameter,
-                                                                                value_of_parameter=value)
-        data_visualisations.plot_test_data(x_p, y_p, x_c, y_c, y_p_err, y_c_err, title)
-
-    data_visualisations.plot_test_data_overall(results_data, values_of_parameter,
-                                               parameter, data_processor.pass_data_to_plot)
-    data_visualisations.plot_averages(ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B)
+    if fidelity:
+        results_data = data_processor.prepare_data(results_data_file)
+        results_data = data_processor.evaluate_efficiency(results_data=results_data, time_of_experiment=10000)
+        data_visualisations.plot_test_data_overall(results_data, values_of_parameter,
+                                                   parameter, data_processor.pass_data_to_plot)
+        data_visualisations.plot_averages(ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B)
+    else:
+        print("[ERROR] Check the signals")
 
     del data_processor
     del data_visualisations

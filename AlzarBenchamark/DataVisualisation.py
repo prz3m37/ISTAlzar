@@ -94,8 +94,9 @@ class DataVisualisation(DataProcessor):
         return
 
     @staticmethod
-    def plot_account_sets(data):
+    def plot_account_sets(data) -> None:
         data.plot.bar(x="Data", y="Count", rot=0)
+        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/values_histogram.png")
         return
 
     @staticmethod

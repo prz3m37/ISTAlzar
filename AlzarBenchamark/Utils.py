@@ -80,11 +80,29 @@ class Utils:
             if num % 2 != 0:
                 ch_B.append(rpb_arr[start:end])
 
-        data_avg_ch_A = data_avg[0:length_of_data/2]
-        data_avg_ch_B = data_avg[length_of_data/2:0]
+        data_avg_ch_A = data_avg[0:length_of_data / 2]
+        data_avg_ch_B = data_avg[length_of_data / 2:0]
         return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B
 
     def prepare_binary_data(self, data_path: str, data_avg_path: str, buffers_per_acq: int):
         data, data_avg = self.__open_binary_files(data_path, data_avg_path)
         ch_A, ch_B, data_avg_ch_A, data_avg_ch_B = self.__parse_binary_data(data, data_avg, buffers_per_acq)
         return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B
+
+    @staticmethod
+    def generate_config_file(post_trigger_samples: [], records_per_buff: [], buff_per_acq: [], decimation: int = 1):
+        #post_trigger_samples = [64, 1024, 2048, 3008, 4032, 5056, 6016, 7040, 8064, 9088, 9984]
+        cfg_file = open("./configurationFile.txt", 'a')
+        i = 1
+        for post_trigger_sample in post_trigger_samples:
+            for record in records_per_buff:
+                for buffer in buff_per_acq:
+                    message = "*Set%s\n" % i + \
+                              "decimation=%s\n" % decimation + \
+                              "recordsPerBuffer=%s\n" % record + \
+                              "buffersPerAcquisition=%s\n" % buffer + \
+                              "postTriggerSamples=%s\n" % post_trigger_sample + "\n"
+                    i += 1
+                    cfg_file.write(message)
+        cfg_file.close()
+        return

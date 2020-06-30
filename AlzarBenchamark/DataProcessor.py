@@ -75,8 +75,12 @@ class DataProcessor:
     # TODO: Set it properly
     @staticmethod
     def __calculate_average(channel_A: list, channel_B: list):
-        channel_A_avg = np.mean(channel_A, axis=0)
-        channel_B_avg = np.mean(channel_B, axis=0)
+        channel_A_buffer_avg, channel_B_buffer_avg = [], []
+        for num, buffer_A, buffer_B in enumerate(zip(channel_A, channel_B)):
+            channel_A_buffer_avg[num] = np.mean(buffer_A, axis=0)
+            channel_B_buffer_avg[num] = np.mean(buffer_B, axis=0)
+        channel_A_avg = np.mean(channel_A_buffer_avg, axis=0)
+        channel_B_avg = np.mean(channel_B_buffer_avg, axis=0)
         return channel_A_avg, channel_B_avg
 
     @staticmethod

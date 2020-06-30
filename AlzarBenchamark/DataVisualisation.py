@@ -1,11 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from DataProcessor import DataProcessor
+import seaborn as sns
 
 
 class DataVisualisation(DataProcessor):
 
     def __init__(self):
+        sns.set()
         self.__data_processor = DataProcessor()
 
     def __del__(self):
@@ -73,7 +75,6 @@ class DataVisualisation(DataProcessor):
 
     @staticmethod
     def plot_averages(ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B):
-
         time = np.arange(0, 64, 1)
         plt.figure(figsize=(18, 10))
         plt.subplot(211)
@@ -89,5 +90,20 @@ class DataVisualisation(DataProcessor):
         plt.axvline(y=50, color='r', ls=":")
         plt.xlabel('Time[ns]')
         plt.ylabel('Voltage[V]')
+        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/channels_data_avg_comparison.png")
+        return
+
+    @staticmethod
+    def plot_account_sets(data):
+        data.plot.bar(x="Data", y="Count", rot=0)
+        return
+
+    @staticmethod
+    def plot_density(rec_per_buffer, buff_per_acq, efficiency):
+        plt.scatter(rec_per_buffer, buff_per_acq, cmap='inferno', c=efficiency, s=100)
+        plt.colorbar()
+        plt.title("Efficiency vs RPB anf BPA")
+        plt.ylabel('Buffers per acquisition')
+        plt.xlabel('Records per buffer')
         plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/channels_data_avg_comparison.png")
         return

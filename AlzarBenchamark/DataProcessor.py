@@ -46,11 +46,17 @@ class DataProcessor:
         return cpp_code_efficiency, python_code_efficiency
 
     @staticmethod
-    def account_sets(results_data: pd.DataFrame):
-        account_avg_prams = results_data.groupby(['Records_per_buffer',
-                                                  'Buffers_per_acquisition',
-                                                  'Post_trigger_samples']).size().reset_index().rename(columns={0: ''})
-        return account_avg_prams
+    def account_sets(results_data: pd.DataFrame, number_of_averages: int):
+        order = ['Records_per_buffer', 'Buffers_per_acquisition', 'Post_trigger_samples']
+        account_avg_prams = results_data.groupby([order]).size().reset_index().rename(columns={0: 'Count'})
+        account_avg_prams['Records_per_buffer'] = account_avg_prams['Records_per_buffer'].astype(str)
+        account_avg_prams['Buffers_per_acquisition'] = account_avg_prams['Buffers_per_acquisition'].astype(str)
+        account_avg_prams['Post_trigger_samples'] = account_avg_prams['Post_trigger_samples'].astype(str)
+        account_avg_prams['Data'] = "RPB: " + account_avg_prams['Records_per_buffer'] + \
+                                    " BPA: " + account_avg_prams['Buffers_per_acquisition'] \
+                                    + " PTS: " + account_avg_prams['Post_trigger_samples']
+        failed_acc_data = account_avg_prams[account_avg_prams["count"] < number_of_averages]
+        return failed_acc_data
 
     def pass_data_to_plot(self, results_data: pd.DataFrame, parameter: str,
                           value_of_parameter: int or float, code_language: str = None):
@@ -114,12 +120,3 @@ class DataProcessor:
             converted_signal_A.append(converted_sample_A)
             converted_signal_B.append(converted_sample_B)
         return converted_signal_A, converted_signal_B
-
-import matplotlib.pyplot as plt
-d = {'col1': [1, 1, 1, 1, 2, 2, 2, 2], 'col2': [3,3,3,3,3,4,4,4], 'eff': [1,2,3,4,5,6,7,8]}
-df = pd.DataFrame(data=d)
-print(df)
-result = df.groupby(['col1', 'col2']).size().reset_index().rename(columns={0:'count'})
-print(result)
-result["count"].hist(by = result[['col1', 'col2']])
-plt.show()

@@ -65,19 +65,23 @@ class Utils:
         f_avg.close()
         return data, data_avg
 
-    # TODO: Reverse dividing data : samples , recordsa, buffers
     @staticmethod
-    def __parse_binary_data(data: np.array, data_avg: np.array, records_per_buffer: int):
-        length_of_data = len(data_avg)
-        ch_A, ch_B = [], []
-        for num, i in enumerate(range(records_per_buffer)):
+    def __parse_binary_data(data: np.array, data_avg: np.array, records_per_buffer: int, buffers_per_acquisition: int):
+        length_of_data = int(len(data_avg))
+        ch_A, ch_B, rpb_arr = [], [], []
+        for i in range(records_per_buffer):
             start, end = 64 * i, 64 * (i + 1)
+            rpb_arr.append(data[start:end])
+
+        for num, j in enumerate(range(buffers_per_acquisition)):
+            start, end = records_per_buffer * j, records_per_buffer * (j + 1)
             if num % 2 == 0:
-                ch_A.append(data[start:end])
+                ch_A.append(rpb_arr[start:end])
             if num % 2 != 0:
-                ch_B.append(data[start:end])
-        data_avg_ch_A = data_avg[0:length_of_data]
-        data_avg_ch_B = data_avg[length_of_data:0]
+                ch_B.append(rpb_arr[start:end])
+
+        data_avg_ch_A = data_avg[0:length_of_data/2]
+        data_avg_ch_B = data_avg[length_of_data/2:0]
         return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B
 
     def prepare_binary_data(self, data_path: str, data_avg_path: str, buffers_per_acq: int):
@@ -96,5 +100,14 @@ for num, i in enumerate(range(6)):
     if num % 2 != 0:
         print("b", data[start:end])
         ch_B.append(data[start:end])
+
+for num, j in enumerate(range(3)):
+    start, end = records_per_buffer * j, records_per_buffer * (j + 1)
+    if num % 2 == 0:
+        buffer_A.append(data[start:end])
+    if num % 2 != 0:
+        buffer_B.append(data[start:end])
 print(ch_A)
+print(np.mean((ch_A), axis=0))
 print(ch_B)
+print(np.mean((ch_B), axis=0))

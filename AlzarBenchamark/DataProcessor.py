@@ -97,9 +97,18 @@ class DataProcessor:
         return ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B
 
     @staticmethod
-    def convert_samples_values(sample_value, input_range_volts):
+    def __convert_samples_values(sample_value, input_range_volts):
         bits_per_sample = 8
         code_zero = (1 << (bits_per_sample - 1)) - 0.5
         code_range = (1 << (bits_per_sample - 1)) - 0.5
         sample_volts = input_range_volts * float((sample_value - code_zero) / code_range)
         return sample_volts
+
+    def get_converted_signal(self, channel_A_avg, channel_B_avg):
+        converted_signal_A, converted_signal_B = [], []
+        for sample_A, sample_B in zip(channel_A_avg, channel_B_avg):
+            converted_sample_A = self.__convert_samples_values(sample_A, 0.5)
+            converted_sample_B = self.__convert_samples_values(sample_B, 0.5)
+            converted_signal_A.append(converted_sample_A)
+            converted_signal_B.append(converted_sample_B)
+        return converted_signal_A, converted_signal_B

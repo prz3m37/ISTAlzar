@@ -15,13 +15,8 @@ class DataProcessor:
         read_results_df = self.__utils.read_results(results_data_file)
         read_results_df.columns = ["Code_version", "Test_data", "Captured_time[ns]", "Records_per_buffer",
                                    "Buffers_per_acquisition", "Post_trigger_samples", "decimation"]
-
         read_results_df["Captured_time[ns]"] = read_results_df["Captured_time[ns]"] * 10 ** 9
         read_results_df.sort_values(by=["Code_version"], inplace=True)
-        read_results_df["Range_flag[MB]"] = (2 * 8 * read_results_df["Post_trigger_samples"] *
-                                             read_results_df["Records_per_buffer"]) / 10 ** 6
-        read_results_df["Range_flag_per_channel[MB]"] = (8 * read_results_df["Post_trigger_samples"] *
-                                                         read_results_df["Records_per_buffer"]) / 10 ** 6
         read_results_df["Total_time[ns]"] = read_results_df["Post_trigger_samples"] * read_results_df["decimation"]
         return read_results_df
 
@@ -49,6 +44,13 @@ class DataProcessor:
         python_code_efficiency = cpp_code_data_extracted.groupby([parameter, "percentage[%]"],
                                                                  as_index=False).agg({'Efficiency': ['mean', 'std']})
         return cpp_code_efficiency, python_code_efficiency
+
+    @staticmethod
+    def account_sets(results_data: pd.DataFrame):
+        account_avg_prams = results_data.groupby(['Records_per_buffer',
+                                                  'Buffers_per_acquisition',
+                                                  'Post_trigger_samples']).size().reset_index().rename(columns={0: ''})
+        return account_avg_prams
 
     def pass_data_to_plot(self, results_data: pd.DataFrame, parameter: str,
                           value_of_parameter: int or float, code_language: str = None):
@@ -112,3 +114,12 @@ class DataProcessor:
             converted_signal_A.append(converted_sample_A)
             converted_signal_B.append(converted_sample_B)
         return converted_signal_A, converted_signal_B
+
+import matplotlib.pyplot as plt
+d = {'col1': [1, 1, 1, 1, 2, 2, 2, 2], 'col2': [3,3,3,3,3,4,4,4], 'eff': [1,2,3,4,5,6,7,8]}
+df = pd.DataFrame(data=d)
+print(df)
+result = df.groupby(['col1', 'col2']).size().reset_index().rename(columns={0:'count'})
+print(result)
+result["count"].hist(by = result[['col1', 'col2']])
+plt.show()

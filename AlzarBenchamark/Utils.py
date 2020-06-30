@@ -88,26 +88,3 @@ class Utils:
         data, data_avg = self.__open_binary_files(data_path, data_avg_path)
         ch_A, ch_B, data_avg_ch_A, data_avg_ch_B = self.__parse_binary_data(data, data_avg, buffers_per_acq)
         return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B
-
-
-data = [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6]
-ch_A, ch_B = [], []
-for num, i in enumerate(range(6)):
-    start, end = 3 * i, 3 * (i + 1)
-    if num % 2 == 0:
-        print("a", data[start:end])
-        ch_A.append(data[start:end])
-    if num % 2 != 0:
-        print("b", data[start:end])
-        ch_B.append(data[start:end])
-
-for num, j in enumerate(range(3)):
-    start, end = records_per_buffer * j, records_per_buffer * (j + 1)
-    if num % 2 == 0:
-        buffer_A.append(data[start:end])
-    if num % 2 != 0:
-        buffer_B.append(data[start:end])
-print(ch_A)
-print(np.mean((ch_A), axis=0))
-print(ch_B)
-print(np.mean((ch_B), axis=0))

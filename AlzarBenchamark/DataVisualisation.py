@@ -71,7 +71,6 @@ class DataVisualisation(DataProcessor):
         plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/" + str(title) + "_overall.png")
         return
 
-    # TODO: plot in VOLTAGES !!!
     @staticmethod
     def plot_averages(ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B):
 

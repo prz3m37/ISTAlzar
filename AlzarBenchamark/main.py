@@ -2,6 +2,7 @@ from DataProcessor import DataProcessor
 from DataVisualisation import DataVisualisation
 
 
+# TODO: Run sh script from here but everything else leave in script
 def main():
     d_processor = DataProcessor()
     d_visual = DataVisualisation()

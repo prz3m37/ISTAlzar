@@ -14,7 +14,6 @@ for i in {1..5}
       # shellcheck disable=SC2035
       cd /home/useme/Przemek/CppVersion/ATS9870/DualPort/NPT_Average/ && ./ATS9870_NPT_Average configurationFile.txt *Set$j
       echo
-      echo "############### Test for $i finished in: $((runtime)) seconds"
   done
 done
 end=$(date +"%s")
@@ -37,7 +36,6 @@ for i in {1..5}
       echo
       # shellcheck disable=SC2035
       python3 /home/useme/Przemek/PythonVersion/ATS9870/NPT_Average/ATS9870_NPT_Average.py configurationFile.txt *Set$j
-      echo "############### Test for $i finished in: $((runtime)) seconds"
   done
 done
 end=$(date +"%s")

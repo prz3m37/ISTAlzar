@@ -35,6 +35,7 @@ class DataProcessor:
         cpp_code_data = results_data.loc[results_data["Code_version"] == "[CppCode]"]
         return python_code_data, cpp_code_data
 
+    # TODO: Check and adjust function for possibility to return different parameters
     def __extract_data(self, results_data: pd.DataFrame, parameter: str, value_of_parameter: int or float):
         python_code_data, cpp_code_data = self.__group_code_versions(results_data)
         python_code_data_extracted = python_code_data.loc[python_code_data[parameter] == value_of_parameter]

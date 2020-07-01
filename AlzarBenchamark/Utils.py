@@ -91,7 +91,7 @@ class Utils:
 
     @staticmethod
     def generate_config_file(post_trigger_samples: [], records_per_buff: [], buff_per_acq: [], decimation: int = 1):
-        #post_trigger_samples = [64, 1024, 2048, 3008, 4032, 5056, 6016, 7040, 8064, 9088, 9984]
+        # post_trigger_samples = [64, 1024, 2048, 3008, 4032, 5056, 6016, 7040, 8064, 9088, 9984]
         cfg_file = open("./configurationFile.txt", 'a')
         i = 1
         for post_trigger_sample in post_trigger_samples:

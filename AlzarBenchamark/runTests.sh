@@ -4,7 +4,7 @@ start=$(date +"%s")
 for i in {1..5}
   do
   echo "############### Test run number: $i  "
-  for j in {1..17226}
+  for j in {1..50}
     do
       echo
       echo "############### Test for configuration: Set$j"
@@ -13,25 +13,6 @@ for i in {1..5}
       echo
       # shellcheck disable=SC2035
       cd /home/useme/Przemek/CppVersion/ATS9870/DualPort/NPT_Average/ && ./ATS9870_NPT_Average configurationFile.txt *Set$j
-      echo
-      echo "############### Test for $i finished in: $((runtime)) seconds"
-  done
-done
-end=$(date +"%s")
-runtime=$((end-start))
-echo "############### Test for Cpp code finished in: $((runtime)) seconds ###############"
-
-sleep 60
-
-echo
-start=$(date +"%s")
-for i in {1..5}
-  do
-  echo "############### Test run number: $i  "
-  for j in {1..17226}
-    do
-      echo
-      echo "############### Test for configuration: Set$j"
       echo
       echo "[INFO] Python code test run....... "
       echo
@@ -42,4 +23,5 @@ for i in {1..5}
 done
 end=$(date +"%s")
 runtime=$((end-start))
-echo "############### Test for Python code finished in: $((runtime)) seconds ###############"
+echo "############### Tests finished in: $((runtime)) seconds ###############"
+

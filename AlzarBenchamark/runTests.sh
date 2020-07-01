@@ -4,7 +4,7 @@ start=$(date +"%s")
 for i in {1..5}
   do
   echo "############### Test run number: $i  "
-  for j in {1..17226}
+  for j in {1..3344}
     do
       echo
       echo "############### Test for configuration: Set$j"
@@ -28,7 +28,7 @@ start=$(date +"%s")
 for i in {1..5}
   do
   echo "############### Test run number: $i  "
-  for j in {1..17226}
+  for j in {1..3344}
     do
       echo
       echo "############### Test for configuration: Set$j"

@@ -61,7 +61,7 @@ class Utils:
         f.close()
 
         f_avg = open(data_avg_path, "r")
-        data_avg = np.fromfile(f, dtype=np.uint8)
+        data_avg = np.fromfile(f_avg, dtype=np.uint8)
         f_avg.close()
         return data, data_avg
 
@@ -69,22 +69,21 @@ class Utils:
     def __parse_binary_data(data: np.array, data_avg: np.array, records_per_buffer: int, buffers_per_acquisition: int):
         length_of_data = int(len(data_avg))
         ch_A, ch_B, rpb_arr = [], [], []
-        for i in range(records_per_buffer):
+        for i in range(records_per_buffer*2):
             start, end = 64 * i, 64 * (i + 1)
-            rpb_arr.append(data[start:end])
-
+            rpb_arr.append(data[start:end].tolist())
         for num, j in enumerate(range(buffers_per_acquisition)):
             start, end = records_per_buffer * j, records_per_buffer * (j + 1)
             if num % 2 == 0:
                 ch_A.append(rpb_arr[start:end])
             if num % 2 != 0:
                 ch_B.append(rpb_arr[start:end])
-
-        data_avg_ch_A = data_avg[0:length_of_data / 2]
-        data_avg_ch_B = data_avg[length_of_data / 2:0]
+        data_avg_ch_A = data_avg[0:int(length_of_data / 2)]
+        data_avg_ch_B = data_avg[int(length_of_data / 2):]
         return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B
 
-    def prepare_binary_data(self, data_path: str, data_avg_path: str, buffers_per_acq: int):
+    def prepare_binary_data(self, data_path: str, data_avg_path: str, records_per_buffer: int, buffers_per_acq: int):
         data, data_avg = self.__open_binary_files(data_path, data_avg_path)
-        ch_A, ch_B, data_avg_ch_A, data_avg_ch_B = self.__parse_binary_data(data, data_avg, buffers_per_acq)
+        ch_A, ch_B, data_avg_ch_A, data_avg_ch_B = self.__parse_binary_data(data, data_avg,
+                                                                            records_per_buffer, buffers_per_acq)
         return ch_A, ch_B, data_avg_ch_A, data_avg_ch_B

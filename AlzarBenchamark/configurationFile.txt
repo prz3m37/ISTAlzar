@@ -333,4 +333,3 @@ decimation=1
 recordsPerBuffer=8192
 buffersPerAcquisition=512
 postTriggerSamples=9088
-

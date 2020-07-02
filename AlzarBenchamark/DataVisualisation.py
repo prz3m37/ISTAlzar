@@ -32,13 +32,13 @@ class DataVisualisation(DataProcessor):
         ax1.set_xticklabels([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], fontsize=12)
         fig.suptitle(title)
         plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/" + str(title) + ".png")
-
+        plt.close()
         return
 
     @staticmethod
-    def plot_test_data_overall(results_data, values_of_parameter, parameter, pass_data_to_plot, title):
+    def plot_test_data_overall(results_data, values_of_parameter, parameter, pass_data_to_plot):
         plt.figure(figsize=(18, 10))
-        plt.subplot(211)
+        #plt.subplot(211)
         for value in values_of_parameter:
             label = str(value) + " " + parameter
             x_c, y_c, y_c_err = pass_data_to_plot(results_data=results_data, parameter=parameter,
@@ -46,16 +46,18 @@ class DataVisualisation(DataProcessor):
             plt.errorbar(x_c, y_c, yerr=y_c_err, label=label, fmt='o', capthick=2,
                          uplims=True, lolims=True)
 
-        plt.xticks(np.arange(0, 100, step=10))
-        plt.axhline(y=0.5, color='r', ls=":")
-        plt.yticks(np.arange(0.2, 1.1, step=0.1))
-        plt.grid(True)
-        plt.legend(bbox_to_anchor=(1.1, 1.02), loc="upper right")
-        plt.xlabel('t_total/t_trigger [%]')
-        plt.ylabel('Efficiency')
-        plt.title("NPT Average for Cpp and Python efficiency for all examples")
+            plt.xticks(np.arange(0, 100, step=10))
+            plt.axhline(y=0.5, color='r', ls=":")
+            plt.yticks(np.arange(0.2, 1.1, step=0.1))
+            plt.grid(True)
+            plt.legend(bbox_to_anchor=(1.1, 1.02), loc="upper right")
+            plt.xlabel('t_total/t_trigger [%]')
+            plt.ylabel('Efficiency')
+            plt.title("NPT Average for Cpp efficiency for all examples")
+            plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/Cpp_90_overall.png")
+            plt.close()
 
-        plt.subplot(212)
+        """  plt.subplot(212)
         for value in values_of_parameter:
             label = str(value) + " " + parameter
             x_p, y_p, y_p_err = pass_data_to_plot(results_data=results_data, parameter=parameter,
@@ -68,9 +70,9 @@ class DataVisualisation(DataProcessor):
         plt.grid(True)
         plt.axhline(y=0.5, color='r', ls=":")
         plt.xlabel('t_total/t_trigger [%]')
-        plt.ylabel('Efficiency')
+        plt.ylabel('Efficiency')"""
 
-        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/" + str(title) + "_overall.png")
+
         return
 
     @staticmethod
@@ -78,34 +80,42 @@ class DataVisualisation(DataProcessor):
         time = np.arange(0, 64, 1)
         plt.figure(figsize=(18, 10))
         plt.subplot(211)
-        plt.plot(time, ch_A_avg)
-        plt.plot(time, data_avg_ch_A)
-        plt.axvline(y=50, color='r', ls=":")
+        plt.plot(time, ch_A_avg, '-o', label="Channel A post averaging")
+        plt.plot(time, data_avg_ch_A, '-o', label="Channel A code averaging")
+        plt.axvline(x=50, color='r', ls=":")
         plt.xlabel('Time[ns]')
         plt.ylabel('Voltage[V]')
+        plt.legend()
+        plt.title("Channel averages comparision")
 
         plt.subplot(212)
-        plt.plot(time, ch_B_avg)
-        plt.plot(time, data_avg_ch_B)
-        plt.axvline(y=50, color='r', ls=":")
+        plt.plot(time, ch_B_avg, '-o', label="Channel B post averaging")
+        plt.plot(time, data_avg_ch_B, '-o', label="Channel B code averaging")
+        plt.axvline(x=50, color='r', ls=":")
         plt.xlabel('Time[ns]')
         plt.ylabel('Voltage[V]')
+        plt.legend()
         plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/channels_data_avg_comparison.png")
+        plt.close()
         return
 
     @staticmethod
     def plot_account_sets(data) -> None:
-        data.plot.bar(x="Data", y="Count", rot=0)
+        data.plot.bar(x="Data", y="Count", rot=45, figsize=(15, 17))
+        plt.title("Statistic for sets")
         plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/values_histogram.png")
+        plt.close()
         return
 
     @staticmethod
     def plot_density(results_data, code_language, pass_data_to_density_plot):
         rec_per_buffer, buff_per_acq, efficiency = pass_data_to_density_plot(results_data, code_language)
+        plt.figure(figsize=(15, 10))
         plt.scatter(rec_per_buffer, buff_per_acq, cmap='inferno', c=efficiency, s=100)
         plt.colorbar()
-        plt.title("Efficiency vs RPB anf BPA")
+        plt.title("Efficiency for PTS=9088 and different RPB and BPA")
         plt.ylabel('Buffers per acquisition')
         plt.xlabel('Records per buffer')
-        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/channels_data_avg_comparison.png")
+        plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/density_plot.png")
+        plt.close()
         return

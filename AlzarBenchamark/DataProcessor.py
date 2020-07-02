@@ -57,14 +57,14 @@ class DataProcessor:
     @staticmethod
     def account_sets(results_data: pd.DataFrame, number_of_averages: int):
         order = ['Records_per_buffer', 'Buffers_per_acquisition', 'Post_trigger_samples']
-        account_avg_prams = results_data.groupby([order]).size().reset_index().rename(columns={0: 'Count'})
+        account_avg_prams = results_data.groupby(order).size().reset_index().rename(columns={0: 'Count'})
         account_avg_prams['Records_per_buffer'] = account_avg_prams['Records_per_buffer'].astype(str)
         account_avg_prams['Buffers_per_acquisition'] = account_avg_prams['Buffers_per_acquisition'].astype(str)
         account_avg_prams['Post_trigger_samples'] = account_avg_prams['Post_trigger_samples'].astype(str)
         account_avg_prams['Data'] = "RPB: " + account_avg_prams['Records_per_buffer'] + \
                                     " BPA: " + account_avg_prams['Buffers_per_acquisition'] \
                                     + " PTS: " + account_avg_prams['Post_trigger_samples']
-        failed_acc_data = account_avg_prams[account_avg_prams["count"] < number_of_averages]
+        failed_acc_data = account_avg_prams[account_avg_prams["Count"] < number_of_averages]
         return failed_acc_data
 
     def pass_data_to_density_plot(self, results_data: pd.DataFrame, code_language: str = None):
@@ -75,9 +75,9 @@ class DataProcessor:
             z_python = python_code_efficiency["Efficiency"]["mean"].values
             return x_python, y_python, z_python
         if code_language == "cpp":
-            x_cpp = python_code_efficiency["Records_per_buffer"].values
-            y_cpp = python_code_efficiency["Buffers_per_acquisition"].values
-            z_cpp = python_code_efficiency["Efficiency"]["mean"].values
+            x_cpp = cpp_code_efficiency["Records_per_buffer"].values
+            y_cpp = cpp_code_efficiency["Buffers_per_acquisition"].values
+            z_cpp = cpp_code_efficiency["Efficiency"]["mean"].values
             return x_cpp, y_cpp, z_cpp
         else:
             x_python = python_code_efficiency["Records_per_buffer"].values
@@ -87,7 +87,6 @@ class DataProcessor:
             y_cpp = python_code_efficiency["Buffers_per_acquisition"].values
             z_cpp = python_code_efficiency["Efficiency"]["mean"].values
             return x_cpp, y_cpp, z_cpp, x_python, y_python, z_python
-        return
 
     def pass_data_to_plot(self, results_data: pd.DataFrame, parameter: str,
                           value_of_parameter: int or float, code_language: str = None):
@@ -115,11 +114,11 @@ class DataProcessor:
     @staticmethod
     def __calculate_average(channel_A: list, channel_B: list):
         channel_A_buffer_avg, channel_B_buffer_avg = [], []
-        for num, buffer_A, buffer_B in enumerate(zip(channel_A, channel_B)):
-            channel_A_buffer_avg[num] = np.mean(buffer_A, axis=0)
-            channel_B_buffer_avg[num] = np.mean(buffer_B, axis=0)
-        channel_A_avg = np.mean(channel_A_buffer_avg, axis=0)
-        channel_B_avg = np.mean(channel_B_buffer_avg, axis=0)
+        for buffer_A, buffer_B in zip(channel_A, channel_B):
+            channel_A_buffer_avg.append(np.mean(buffer_A, axis=0).astype(int))
+            channel_B_buffer_avg.append(np.mean(buffer_B, axis=0).astype(int))
+        channel_A_avg = np.mean(channel_A_buffer_avg, axis=0).astype(int)
+        channel_B_avg = np.mean(channel_B_buffer_avg, axis=0).astype(int)
         return channel_A_avg, channel_B_avg
 
     @staticmethod
@@ -129,9 +128,9 @@ class DataProcessor:
         else:
             return False
 
-    def prepare_channel_avg_data(self, data_path: str, data_avg_path: str, buffers_per_acq: int):
+    def prepare_channel_avg_data(self, data_path: str, data_avg_path: str, records_per_buffer: int, buffers_per_acq: int):
         ch_A, ch_B, data_avg_ch_A, data_avg_ch_B = self.__utils.prepare_binary_data(data_path, data_avg_path,
-                                                                                    buffers_per_acq)
+                                                                                   records_per_buffer, buffers_per_acq)
         ch_A_avg, ch_B_avg = self.__calculate_average(ch_A, ch_B)
         return ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B
 
@@ -151,10 +150,3 @@ class DataProcessor:
             converted_signal_A.append(converted_sample_A)
             converted_signal_B.append(converted_sample_B)
         return converted_signal_A, converted_signal_B
-
-
-df = pd.DataFrame({'col1': [1, 1, 5, 5, 10], 'col2': [3, 3, 8, 8, 9], 'col3': [1, 1, 1, 1, 1]})
-df["Efficiency"] = df["col1"] / df["col2"]
-print(df)
-df2 = df.groupby(["col2", "col1"], as_index=False).agg({'Efficiency': ['mean', 'std']})
-print(df2)

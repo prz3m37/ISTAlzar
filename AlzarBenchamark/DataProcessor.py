@@ -46,6 +46,14 @@ class DataProcessor:
                                                                  as_index=False).agg({'Efficiency': ['mean', 'std']})
         return cpp_code_efficiency, python_code_efficiency
 
+    def __extract_data_to_density_plot(self, results_data: pd.DataFrame):
+        python_code_data, cpp_code_data = self.__group_code_versions(results_data)
+        cpp_code_eff = cpp_code_data.groupby(["Records_per_buffer", "Buffers_per_acquisition", "percentage[%]"],
+                                             as_index=False).agg({'Efficiency': ['mean', 'std']})
+        python_code_eff = python_code_data.groupby(["Records_per_buffer", "Buffers_per_acquisition", "percentage[%]"],
+                                                   as_index=False).agg({'Efficiency': ['mean', 'std']})
+        return cpp_code_eff, python_code_eff
+
     @staticmethod
     def account_sets(results_data: pd.DataFrame, number_of_averages: int):
         order = ['Records_per_buffer', 'Buffers_per_acquisition', 'Post_trigger_samples']
@@ -58,6 +66,28 @@ class DataProcessor:
                                     + " PTS: " + account_avg_prams['Post_trigger_samples']
         failed_acc_data = account_avg_prams[account_avg_prams["count"] < number_of_averages]
         return failed_acc_data
+
+    def pass_data_to_density_plot(self, results_data: pd.DataFrame, code_language: str = None):
+        cpp_code_efficiency, python_code_efficiency = self.__extract_data_to_density_plot(results_data)
+        if code_language == "python":
+            x_python = python_code_efficiency["Records_per_buffer"].values
+            y_python = python_code_efficiency["Buffers_per_acquisition"].values
+            z_python = python_code_efficiency["Efficiency"]["mean"].values
+            return x_python, y_python, z_python
+        if code_language == "cpp":
+            x_cpp = python_code_efficiency["Records_per_buffer"].values
+            y_cpp = python_code_efficiency["Buffers_per_acquisition"].values
+            z_cpp = python_code_efficiency["Efficiency"]["mean"].values
+            return x_cpp, y_cpp, z_cpp
+        else:
+            x_python = python_code_efficiency["Records_per_buffer"].values
+            y_python = python_code_efficiency["Buffers_per_acquisition"].values
+            z_python = python_code_efficiency["Efficiency"]["mean"].values
+            x_cpp = python_code_efficiency["Records_per_buffer"].values
+            y_cpp = python_code_efficiency["Buffers_per_acquisition"].values
+            z_cpp = python_code_efficiency["Efficiency"]["mean"].values
+            return x_cpp, y_cpp, z_cpp, x_python, y_python, z_python
+        return
 
     def pass_data_to_plot(self, results_data: pd.DataFrame, parameter: str,
                           value_of_parameter: int or float, code_language: str = None):
@@ -121,3 +151,10 @@ class DataProcessor:
             converted_signal_A.append(converted_sample_A)
             converted_signal_B.append(converted_sample_B)
         return converted_signal_A, converted_signal_B
+
+
+df = pd.DataFrame({'col1': [1, 1, 5, 5, 10], 'col2': [3, 3, 8, 8, 9], 'col3': [1, 1, 1, 1, 1]})
+df["Efficiency"] = df["col1"] / df["col2"]
+print(df)
+df2 = df.groupby(["col2", "col1"], as_index=False).agg({'Efficiency': ['mean', 'std']})
+print(df2)

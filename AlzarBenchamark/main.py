@@ -62,8 +62,7 @@ def main():
     d_visual.plot_account_sets(data_for_histogram)
     d_visual.plot_test_data_overall(results_data, values_of_parameter, parameter, d_processor.pass_data_to_plot)
     d_visual.plot_averages(cnv_signal_A, cnv_signal_B, cnv_data_signal_A, cnv_data_signal_B)
-    # TODO: Get to work this func !!! d_visual.plot_density(rec_per_buffer, buff_per_acq, efficiency)
-    # TODO: We need some function to get data for density plot, maybe we need to rearange data processor !!!!
+    d_visual.plot_density(results_data, "cpp", d_processor.pass_data_to_density_plot)
 
     del d_processor
     del d_visual

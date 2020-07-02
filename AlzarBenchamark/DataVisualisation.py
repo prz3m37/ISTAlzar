@@ -100,7 +100,8 @@ class DataVisualisation(DataProcessor):
         return
 
     @staticmethod
-    def plot_density(rec_per_buffer, buff_per_acq, efficiency):
+    def plot_density(results_data, code_language, pass_data_to_density_plot):
+        rec_per_buffer, buff_per_acq, efficiency = pass_data_to_density_plot(results_data, code_language)
         plt.scatter(rec_per_buffer, buff_per_acq, cmap='inferno', c=efficiency, s=100)
         plt.colorbar()
         plt.title("Efficiency vs RPB anf BPA")

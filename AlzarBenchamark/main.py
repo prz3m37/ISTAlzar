@@ -71,7 +71,7 @@ def main():
             values_of_parameter = [50, 70, 100, 200, 300, 400, 500, 512]
         d_visual.plot_test_data_overall(results_data, values_of_parameter, parameter, d_processor.pass_data_to_plot)
     d_visual.plot_averages(cnv_signal_A, cnv_signal_B, cnv_data_signal_A, cnv_data_signal_B)
-    d_visual.plot_density(results_data_prep, "cpp", d_processor.pass_data_to_density_plot)
+    d_visual.plot_density(results_data_prep, d_processor.pass_data_to_density_plot)
 
     del d_processor
     del d_visual

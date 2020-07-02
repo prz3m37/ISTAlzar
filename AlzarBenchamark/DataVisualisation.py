@@ -108,10 +108,11 @@ class DataVisualisation(DataProcessor):
         return
 
     @staticmethod
-    def plot_density(results_data, code_language, pass_data_to_density_plot):
-        rec_per_buffer, buff_per_acq, efficiency = pass_data_to_density_plot(results_data, code_language)
+    def plot_density(results_data, pass_data_to_density_plot):
+        rpb, bpa, efficiency, rpb_err, bpa_err = pass_data_to_density_plot(results_data)
         plt.figure(figsize=(15, 10))
-        plt.scatter(rec_per_buffer, buff_per_acq, cmap='inferno', c=efficiency, s=100)
+        plt.scatter(rpb, bpa, cmap='inferno', c=efficiency, s=100)
+        plt.scatter(rpb_err, bpa_err, c="grey", s=100)
         plt.colorbar()
         plt.title("Efficiency for PTS=9088 and different RPB and BPA")
         plt.ylabel('Buffers per acquisition')

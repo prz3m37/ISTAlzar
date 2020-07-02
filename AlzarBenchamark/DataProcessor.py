@@ -14,7 +14,7 @@ class DataProcessor:
     def prepare_data(self, results_data_file: str) -> pd.DataFrame:
         read_results_df = self.__utils.read_results(results_data_file)
         read_results_df.columns = ["Code_version", "Test_data", "Captured_time[ns]", "Records_per_buffer",
-                                   "Buffers_per_acquisition", "Post_trigger_samples", "decimation"]
+                                   "Buffers_per_acquisition", "Post_trigger_samples", "decimation", "Error_code"]
         read_results_df["Captured_time[ns]"] = read_results_df["Captured_time[ns]"] * 10 ** 9
         read_results_df.sort_values(by=["Code_version"], inplace=True)
         read_results_df["Total_time[ns]"] = read_results_df["Post_trigger_samples"] * read_results_df["decimation"]
@@ -27,6 +27,7 @@ class DataProcessor:
         results_data["Efficiency"] = ((results_data["Buffers_per_acquisition"]
                                        * results_data["Records_per_buffer"]
                                        * results_data["Time_of_experiment[ns]"]) / results_data["Captured_time[ns]"])
+        results_data.replace([np.inf, -np.inf], -1)
         return results_data
 
     @staticmethod
@@ -37,6 +38,7 @@ class DataProcessor:
 
     # TODO: Check and adjust function for possibility to return different parameters
     def __extract_data(self, results_data: pd.DataFrame, parameter: str, value_of_parameter: int or float):
+        results_data = results_data[(results_data['Efficiency'] > 0)]
         python_code_data, cpp_code_data = self.__group_code_versions(results_data)
         python_code_data_extracted = python_code_data.loc[python_code_data[parameter] == value_of_parameter]
         cpp_code_data_extracted = cpp_code_data.loc[cpp_code_data[parameter] == value_of_parameter]
@@ -48,15 +50,20 @@ class DataProcessor:
 
     def __extract_data_to_density_plot(self, results_data: pd.DataFrame):
         python_code_data, cpp_code_data = self.__group_code_versions(results_data)
-        cpp_code_eff = cpp_code_data.groupby(["Records_per_buffer", "Buffers_per_acquisition", "percentage[%]"],
+        cpp_code_eff = cpp_code_data.groupby(["Records_per_buffer", "Buffers_per_acquisition",
+                                              "Error_code", "percentage[%]"],
                                              as_index=False).agg({'Efficiency': ['mean', 'std']})
-        python_code_eff = python_code_data.groupby(["Records_per_buffer", "Buffers_per_acquisition", "percentage[%]"],
-                                                   as_index=False).agg({'Efficiency': ['mean', 'std']})
-        return cpp_code_eff, python_code_eff
+        cpp_code_eff_error = cpp_code_data[(cpp_code_data['Efficiency'] < 0)].groupby(["Records_per_buffer",
+                                                                                       "Buffers_per_acquisition",
+                                                                                       "Error_code", "percentage[%]"],
+                                                                                      as_index=False).agg(
+            {'Efficiency': ['mean']})
+        return cpp_code_eff, cpp_code_eff_error
 
     @staticmethod
     def account_sets(results_data: pd.DataFrame, number_of_averages: int):
         order = ['Records_per_buffer', 'Buffers_per_acquisition', 'Post_trigger_samples']
+        results_data = results_data[(results_data['Efficiency'] > 0)]
         account_avg_prams = results_data.groupby(order).size().reset_index().rename(columns={0: 'Count'})
         account_avg_prams['Records_per_buffer'] = account_avg_prams['Records_per_buffer'].astype(str)
         account_avg_prams['Buffers_per_acquisition'] = account_avg_prams['Buffers_per_acquisition'].astype(str)
@@ -67,26 +74,15 @@ class DataProcessor:
         failed_acc_data = account_avg_prams[account_avg_prams["Count"] < number_of_averages]
         return failed_acc_data
 
-    def pass_data_to_density_plot(self, results_data: pd.DataFrame, code_language: str = None):
-        cpp_code_efficiency, python_code_efficiency = self.__extract_data_to_density_plot(results_data)
-        if code_language == "python":
-            x_python = python_code_efficiency["Records_per_buffer"].values
-            y_python = python_code_efficiency["Buffers_per_acquisition"].values
-            z_python = python_code_efficiency["Efficiency"]["mean"].values
-            return x_python, y_python, z_python
-        if code_language == "cpp":
-            x_cpp = cpp_code_efficiency["Records_per_buffer"].values
-            y_cpp = cpp_code_efficiency["Buffers_per_acquisition"].values
-            z_cpp = cpp_code_efficiency["Efficiency"]["mean"].values
-            return x_cpp, y_cpp, z_cpp
-        else:
-            x_python = python_code_efficiency["Records_per_buffer"].values
-            y_python = python_code_efficiency["Buffers_per_acquisition"].values
-            z_python = python_code_efficiency["Efficiency"]["mean"].values
-            x_cpp = python_code_efficiency["Records_per_buffer"].values
-            y_cpp = python_code_efficiency["Buffers_per_acquisition"].values
-            z_cpp = python_code_efficiency["Efficiency"]["mean"].values
-            return x_cpp, y_cpp, z_cpp, x_python, y_python, z_python
+    def pass_data_to_density_plot(self, results_data: pd.DataFrame):
+        cpp_code_efficiency, cpp_code_eff_error = self.__extract_data_to_density_plot(results_data)
+        x_cpp = cpp_code_efficiency["Records_per_buffer"].values
+        y_cpp = cpp_code_efficiency["Buffers_per_acquisition"].values
+        z_cpp = cpp_code_efficiency["Efficiency"]["mean"].values
+
+        x_cpp_error = cpp_code_eff_error["Records_per_buffer"].values
+        y_cpp_error = cpp_code_eff_error["Buffers_per_acquisition"].values
+        return x_cpp, y_cpp, z_cpp, x_cpp_error, y_cpp_error
 
     def pass_data_to_plot(self, results_data: pd.DataFrame, parameter: str,
                           value_of_parameter: int or float, code_language: str = None):
@@ -128,9 +124,10 @@ class DataProcessor:
         else:
             return False
 
-    def prepare_channel_avg_data(self, data_path: str, data_avg_path: str, records_per_buffer: int, buffers_per_acq: int):
+    def prepare_channel_avg_data(self, data_path: str, data_avg_path: str, records_per_buffer: int,
+                                 buffers_per_acq: int):
         ch_A, ch_B, data_avg_ch_A, data_avg_ch_B = self.__utils.prepare_binary_data(data_path, data_avg_path,
-                                                                                   records_per_buffer, buffers_per_acq)
+                                                                                    records_per_buffer, buffers_per_acq)
         ch_A_avg, ch_B_avg = self.__calculate_average(ch_A, ch_B)
         return ch_A_avg, ch_B_avg, data_avg_ch_A, data_avg_ch_B
 

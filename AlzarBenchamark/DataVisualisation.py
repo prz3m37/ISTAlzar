@@ -38,7 +38,6 @@ class DataVisualisation(DataProcessor):
     @staticmethod
     def plot_test_data_overall(results_data, values_of_parameter, parameter, pass_data_to_plot):
         plt.figure(figsize=(18, 10))
-        #plt.subplot(211)
         for value in values_of_parameter:
             label = str(value) + " " + parameter
             x_c, y_c, y_c_err = pass_data_to_plot(results_data=results_data, parameter=parameter,
@@ -55,24 +54,7 @@ class DataVisualisation(DataProcessor):
             plt.ylabel('Efficiency')
             plt.title("NPT Average for Cpp efficiency for all examples")
             plt.savefig("/home/useme/Przemek/ATS9870_Results/PlotResults/Cpp_90_overall.png")
-            plt.close()
-
-        """  plt.subplot(212)
-        for value in values_of_parameter:
-            label = str(value) + " " + parameter
-            x_p, y_p, y_p_err = pass_data_to_plot(results_data=results_data, parameter=parameter,
-                                                  value_of_parameter=value, code_language="python")
-            plt.errorbar(x_p, y_p, yerr=y_p_err, label=label, fmt='o', capthick=2,
-                         uplims=True, lolims=True)
-
-        plt.xticks(np.arange(0, 100, step=10))
-        plt.yticks(np.arange(0.2, 1.1, step=0.1))
-        plt.grid(True)
-        plt.axhline(y=0.5, color='r', ls=":")
-        plt.xlabel('t_total/t_trigger [%]')
-        plt.ylabel('Efficiency')"""
-
-
+        plt.close()
         return
 
     @staticmethod
